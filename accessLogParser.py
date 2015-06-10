@@ -57,12 +57,14 @@ class Parser(object):
     """Wrapper class over the specific format parsers."""
 
     COMBINED = 1
-    BOGUS = 2
 
     _instance = None
 
     def __new__(cls, *args, **kwargs):
         """Parser objects should be singletons."""
+        if cls is Parser:
+            raise TypeError("Parser class may not be instantiated directly")
+
         if not cls._instance:
             cls._instance = super(Parser, cls).__new__(cls, *args, **kwargs)
         return cls._instance
@@ -73,7 +75,6 @@ class Parser(object):
         try:
             return {
                 Parser.COMBINED: CombinedParser(),
-                Parser.BOGUS: BogusParser()
             }[format]
         except KeyError:
             raise NoSuchParserError(format)
