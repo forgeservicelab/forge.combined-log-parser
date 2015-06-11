@@ -6,7 +6,7 @@ At the time only apache combined format is supported.
 
 import re
 from ipaddr import IPAddress
-from datetime import datetime, timedelta, tzinfo
+from datetime import datetime, timedelta
 
 
 class NoSuchParserError(Exception):
@@ -20,36 +20,6 @@ class NoSuchParserError(Exception):
     def __str__(self):
         """Exception string representation."""
         return repr(self.msg)
-
-
-class FixedOffset(tzinfo):
-
-    """Fixed offset in minutes: `time = utc_time + utc_offset`."""
-
-    def __init__(self, offset):
-        """Initialize fixed offset."""
-        self.__offset = timedelta(minutes=offset)
-        hours, minutes = divmod(offset, 60)
-        # NOTE: the last part is to remind about deprecated POSIX GMT+h timezones
-        #  that have the opposite sign in the name;
-        #  the corresponding numeric value is not used e.g., no minutes
-        self.__name = '<%+03d%02d>%+d' % (hours, minutes, -hours)
-
-    def utcoffset(self, dt=None):
-        """UTC offset getter."""
-        return self.__offset
-
-    def tzname(self, dt=None):
-        """TimeZone name getter."""
-        return self.__name
-
-    def dst(self, dt=None):
-        """No info."""
-        return timedelta(0)
-
-    def __repr__(self):
-        """Offset representation."""
-        return 'FixedOffset(%d)' % (self.utcoffset().total_seconds() / 60)
 
 
 class Parser(object):
@@ -82,8 +52,9 @@ class Parser(object):
     def _parseTimestamp(self, timestamp):
         naive, offset = timestamp.split()
         naive_ts = datetime.strptime(naive, '%d/%b/%Y:%H:%M:%S')
-        offset_ts = int(offset[-4:-2])*60 + int(offset[-2:])
-        return naive_ts.replace(tzinfo=FixedOffset(offset_ts))
+        offset_ts = int(offset[:-2])*60 + int(offset[-2:])
+        hours, minutes = divmod(offset_ts, 60)
+        return naive_ts - timedelta(hours=hours, minutes=minutes)
 
     def parse(self, log):
         """
