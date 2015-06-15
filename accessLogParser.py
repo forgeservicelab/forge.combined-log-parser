@@ -75,7 +75,7 @@ class CombinedParser(Parser):
 
     def __init__(self):
         """Initialize the log splitting regular expression."""
-        self.regex = re.compile(r'(\S+) (\S+) (\S+) \[(\S+ \S+)\] "(\S+)" (\d+) (\d+) "(\S+)" "(.+)"')
+        self.regex = re.compile(r'(\S+) (\S+) (\S+) \[(\S+ \S+)\] "(.+)" (\d+) (\d+) "(\S+)" "(.+)"')
         self.fields = [
             'remote_ip',
             'remote_logname',
@@ -97,7 +97,12 @@ class CombinedParser(Parser):
         Returns:
             dict: A dictionary with the named fields of the log line.
         """
-        logDict = super(CombinedParser, self).parse(log)
+        try:
+            logDict = super(CombinedParser, self).parse(log)
+        except Exception, e:
+            print log
+            raise e
+
         logDict['remote_ip'] = IPAddress(logDict['remote_ip'])
         logDict['timestamp'] = self._parseTimestamp(logDict['timestamp'])
         logDict['response_status'] = int(logDict['response_status'])
