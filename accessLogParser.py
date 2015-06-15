@@ -75,15 +75,13 @@ class CombinedParser(Parser):
 
     def __init__(self):
         """Initialize the log splitting regular expression."""
-        self.regex = re.compile(r'(\S+) (\S+) (\S+) \[(\S+ \S+)\] "([A-Z]+) (\S+) (\S+)" (\d+) (\d+) "(\S+)" "(.+)"')
+        self.regex = re.compile(r'(\S+) (\S+) (\S+) \[(\S+ \S+)\] "(\S+)" (\d+) (\d+) "(\S+)" "(.+)"')
         self.fields = [
             'remote_ip',
             'remote_logname',
             'remote_user',
             'timestamp',
-            'http_method',
-            'request_uri',
-            'request_protocol',
+            'http_request',
             'response_status',
             'response_size',
             'referer',
